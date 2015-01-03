@@ -17,9 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with call4paper.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask
 import argparse
+from flask import Flask
 from flask.templating import render_template
+import os
+
 
 app = Flask(__name__)
  
@@ -33,6 +35,15 @@ if __name__ == "__main__":
                       help="Enable Web debug mode - not for production!")
   parser.add_argument("-p", "--port", dest="port", type=int,
                       help="Port to listen on")
-  parser.set_defaults(debug=False, port=6942)
+
+  port_from_env = 6942
+  try:
+    port_from_env = int(os.environ['PORT'])
+  except:
+    # Swallow silently
+    app.logger.debug("No port from environment, use default port")
+
+  parser.set_defaults(debug=False, port=port_from_env or 6942)
+
   args = parser.parse_args()
   app.run(debug=args.debug, port=args.port, host=("127.0.0.1" if args.debug else "0.0.0.0"))
